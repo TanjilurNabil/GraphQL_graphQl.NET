@@ -1,13 +1,17 @@
 using GraphQL;
 using GraphQL.MicrosoftDI;
 using GraphQL.Types;
+using GraphQL_graphQl.NET.Data;
 using GraphQL_graphQl.NET.GraphQL;
+using GraphQL_graphQl.NET.GraphQL.Queries;
+using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 
 // Add GraphQL services
+builder.Services.AddSingleton<AppQuery>();
 builder.Services.AddSingleton<ISchema, AppSchema>(services => new AppSchema(new SelfActivatingServiceProvider(services)));
 
 //Add GraphQL server
@@ -15,6 +19,11 @@ builder.Services.AddGraphQL(options =>
 {
     options.AddSystemTextJson();
 });
+builder.Services.AddDbContext<AppDbContext>(options =>
+{
+    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"));
+});
+builder.Services.AddScoped<DbInitializer>();
 
 var app = builder.Build();
 
@@ -31,6 +40,19 @@ app.UseGraphQLGraphiQL("/ui/graphiql");
 
 app.UseHttpsRedirection();
 
+try
+{
+    using (var scope = app.Services.CreateScope())
+    {
+        var dbInitializer = scope.ServiceProvider.GetRequiredService<DbInitializer>();
+        await dbInitializer.InitializeAsync();
+    }
+}
+catch (Exception e)
+{
+
+    Console.WriteLine(e.Message);
+}
 
 
 app.Run();
