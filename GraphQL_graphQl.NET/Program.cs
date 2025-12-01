@@ -12,8 +12,11 @@ var builder = WebApplication.CreateBuilder(args);
 // Add services to the container.
 
 // Add GraphQL services
-builder.Services.AddSingleton<ISchema, AppSchema>(services => new AppSchema(new SelfActivatingServiceProvider(services)));
-
+builder.Services.AddTransient<AppQuery>();
+builder.Services.AddTransient<ISchema, AppSchema>(services => new AppSchema(new SelfActivatingServiceProvider(services)));
+builder.Services.AddTransient<UserType>();
+builder.Services.AddTransient<ProjectType>();
+builder.Services.AddTransient<TaskItemType>();
 //Add GraphQL server
 builder.Services.AddGraphQL(options =>
 {
@@ -56,5 +59,3 @@ catch (Exception e)
 
 
 app.Run();
-
-
