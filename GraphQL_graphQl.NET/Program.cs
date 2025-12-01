@@ -4,6 +4,7 @@ using GraphQL.Types;
 using GraphQL_graphQl.NET.Data;
 using GraphQL_graphQl.NET.GraphQL;
 using GraphQL_graphQl.NET.GraphQL.Queries;
+using GraphQL_graphQl.NET.GraphQL.Types;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -11,9 +12,11 @@ var builder = WebApplication.CreateBuilder(args);
 // Add services to the container.
 
 // Add GraphQL services
-builder.Services.AddSingleton<AppQuery>();
-builder.Services.AddSingleton<ISchema, AppSchema>(services => new AppSchema(new SelfActivatingServiceProvider(services)));
-
+builder.Services.AddTransient<AppQuery>();
+builder.Services.AddTransient<ISchema, AppSchema>(services => new AppSchema(new SelfActivatingServiceProvider(services)));
+builder.Services.AddTransient<UserType>();
+builder.Services.AddTransient<ProjectType>();
+builder.Services.AddTransient<TaskItemType>();
 //Add GraphQL server
 builder.Services.AddGraphQL(options =>
 {
